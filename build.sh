@@ -36,7 +36,8 @@ if [[ "${current_branch}" == *"debug"* ]]; then
 fi
 
 if dkms install -m xpad -v "${version}"; then
-	echo "Build and installed"
+	echo "Build and installed, loading..."
+	modprobe xpad
 else
 	if [ -r "$logs" ]; then
 		cat "$logs" >&2
