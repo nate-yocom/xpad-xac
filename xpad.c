@@ -80,6 +80,7 @@
 #define MAP_TRIGGERS_TO_BUTTONS		(1 << 1)
 #define MAP_STICKS_TO_NULL		(1 << 2)
 #define MAP_SELECT_BUTTON		(1 << 3)
+#define MAP_LAYER_BUTTON		(1 << 4)
 #define DANCEPAD_MAP_CONFIG	(MAP_DPAD_TO_BUTTONS |			\
 				MAP_TRIGGERS_TO_BUTTONS | MAP_STICKS_TO_NULL)
 
@@ -131,6 +132,7 @@ static const struct xpad_device {
 	{ 0x045e, 0x02e3, "Microsoft X-Box One Elite pad", 0, XTYPE_XBOXONE },
 	{ 0x045e, 0x02ea, "Microsoft X-Box One S pad", 0, XTYPE_XBOXONE },
 	{ 0x045e, 0x0719, "Xbox 360 Wireless Receiver", MAP_DPAD_TO_BUTTONS, XTYPE_XBOX360W },
+	{ 0x045e, 0x0b0a, "Microsoft X-Box Adaptive Controller", MAP_LAYER_BUTTON, XTYPE_XBOXONE },
 	{ 0x045e, 0x0b12, "Microsoft Xbox Series S|X Controller", MAP_SELECT_BUTTON, XTYPE_XBOXONE },
 	{ 0x046d, 0xc21d, "Logitech Gamepad F310", 0, XTYPE_XBOX360 },
 	{ 0x046d, 0xc21e, "Logitech Gamepad F510", 0, XTYPE_XBOX360 },
@@ -857,7 +859,17 @@ static void xpadone_process_packet(struct usb_xpad *xpad, u16 cmd, unsigned char
 		if (data[1] == 0x30)
 			xpadone_ack_mode_report(xpad, data[2]);
 
-		input_report_key(dev, BTN_MODE, data[4] & 0x01);
+		/*
+		 * X-Box Adaptive controller sets 0x02 when x-box button is pressed,
+		 * we could probably condense into just data[4] != 0, but explicitly
+		 * checking here ensures no regression if other devices set other bits.
+		 */
+		if (le16_to_cpu(xpad->dev->id.vendor) == 0x045e &&
+			le16_to_cpu(xpad->dev->id.product) == 0x0b0a)
+			input_report_key(dev, BTN_MODE, data[4] & 0x02);
+		else
+			input_report_key(dev, BTN_MODE, data[4] & 0x01);
+
 		input_sync(dev);
 		return;
 	}
@@ -925,6 +937,10 @@ static void xpadone_process_packet(struct usb_xpad *xpad, u16 cmd, unsigned char
 		input_report_abs(dev, ABS_RZ,
 				 (__u16) le16_to_cpup((__le16 *)(data + 8)));
 	}
+
+	/* Layer button has a value of 0-4, so its reported as an axis */
+	if (xpad->mapping & MAP_LAYER_BUTTON)
+		input_report_abs(dev, ABS_MISC, data[34]);
 
 	input_sync(dev);
 }
@@ -1622,6 +1638,8 @@ static void xpad_set_up_abs(struct input_dev *input_dev, signed short abs)
 	case ABS_HAT0Y:	/* the d-pad (only if dpad is mapped to axes */
 		input_set_abs_params(input_dev, abs, -1, 1, 0, 0);
 		break;
+	case ABS_MISC: /* 4 value layer button (such as on the XAC) */
+		input_set_abs_params(input_dev, abs, 0, 4, 0, 0);
 	default:
 		input_set_abs_params(input_dev, abs, 0, 0, 0, 0);
 		break;
@@ -1713,6 +1731,10 @@ static int xpad_init_input(struct usb_xpad *xpad)
 		for (i = 0; xpad_abs_triggers[i] >= 0; i++)
 			xpad_set_up_abs(input_dev, xpad_abs_triggers[i]);
 	}
+
+	/* setup layer buton as an axis with 4 possible values */
+	if (xpad->mapping & MAP_LAYER_BUTTON)
+		xpad_set_up_abs(input_dev, ABS_MISC);
 
 	error = xpad_init_ff(xpad);
 	if (error)
