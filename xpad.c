@@ -1144,6 +1144,11 @@ static void xpad_irq_in(struct urb *urb)
 		goto exit;
 	}
 
+#if defined(DEBUG)
+	// From: https://github.com/paroj/xpad/blob/master/xpad.c
+	print_hex_dump(KERN_DEBUG, "xpad-dbg-in: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->idata, XPAD_PKT_LEN, 0);
+#endif
+
 	switch (xpad->xtype) {
 	case XTYPE_XBOX360:
 		xpad360_process_packet(xpad, xpad->dev, 0, xpad->idata);
@@ -1225,6 +1230,12 @@ static bool xpad_prepare_next_out_packet(struct usb_xpad *xpad)
 		memcpy(xpad->odata, packet->data, packet->len);
 		xpad->irq_out->transfer_buffer_length = packet->len;
 		packet->pending = false;
+
+#if defined(DEBUG)
+		// From: https://github.com/paroj/xpad/blob/master/xpad.c
+		print_hex_dump(KERN_DEBUG, "xpad-dbg-out: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->odata, XPAD_PKT_LEN, 0);
+#endif
+
 		return true;
 	}
 
