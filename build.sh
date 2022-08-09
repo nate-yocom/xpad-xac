@@ -27,6 +27,14 @@ cp -r . "${source}"
 echo "Setting version: ${version}"
 find "$source" -type f \( -name dkms.conf -o -name '*.c' \) -exec sed -i "s/#VERSION#/${version}/" {} +
 
+# If currently loaded, remove current xpad driver
+installed_modules=$(lsmod | grep '^xpad' | cut -d ' ' -f 1 | tr '\n' ' ')
+
+if [ -n "${installed_modules}" ]; then
+	echo "Unloading xpad module"
+	modprobe -r -a ${installed_modules}
+fi
+
 # If we are in a debug branch, -DDEBUG
 current_branch=$(git symbolic-ref HEAD --short)
 echo "Current branch: $current_branch"
