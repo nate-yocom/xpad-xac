@@ -18,7 +18,7 @@ fi
 if [ -n "${installed_version}" ]; then
 	echo "Uninstall xpad ${installed_version}"
 	dkms remove -m xpad -v "${installed_version}" --all
-	rm -r "usr/src/xpad-xac-${installed_version}"
+	rm -r "/usr/src/xpad-${installed_version}"
 else
 	echo "Driver not installed" >&2
 fi

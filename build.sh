@@ -15,8 +15,8 @@ fi
 ./clean.sh
 
 version="0.1"
-source="/usr/src/xpad-xac-${version}"
-logs="/var/lib/dkms/xpad-xac/${version}build/make.log"
+source="/usr/src/xpad-${version}"
+logs="/var/lib/dkms/xpad/${version}build/make.log"
 
 # Build from /usr/src dir
 echo "Copying source to ${source}"
@@ -35,7 +35,7 @@ if [[ "${current_branch}" == *"debug"* ]]; then
 	echo 'ccflags-y += -DDEBUG' >> "${source}/Kbuild"
 fi
 
-if dkms install -m xpad-xac -v "${version}"; then
+if dkms install -m xpad -v "${version}"; then
 	echo "Build and installed"
 else
 	if [ -r "$logs" ]; then
