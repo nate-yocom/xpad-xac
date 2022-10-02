@@ -21,4 +21,4 @@ To remove:
 ```sudo ./clean.sh```
 
 Current state of patch proposed for upstream:
- - v6: https://patchwork.kernel.org/project/linux-input/cover/20220908173930.28940-1-nate@yocom.org/
+ - Accepted into 'next' via linux-input: https://patchwork.kernel.org/project/linux-input/cover/20220908173930.28940-1-nate@yocom.org/
