@@ -1145,8 +1145,8 @@ static void xpad_irq_in(struct urb *urb)
 	}
 
 #if defined(DEBUG)
-	// From: https://github.com/paroj/xpad/blob/master/xpad.c
-	print_hex_dump(KERN_DEBUG, "xpad-dbg-in: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->idata, XPAD_PKT_LEN, 0);
+       // From: https://github.com/paroj/xpad/blob/master/xpad.c
+       print_hex_dump(KERN_DEBUG, "xpad-dbg-in: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->idata, XPAD_PKT_LEN, 0);
 #endif
 
 	switch (xpad->xtype) {
@@ -1232,10 +1232,9 @@ static bool xpad_prepare_next_out_packet(struct usb_xpad *xpad)
 		packet->pending = false;
 
 #if defined(DEBUG)
-		// From: https://github.com/paroj/xpad/blob/master/xpad.c
-		print_hex_dump(KERN_DEBUG, "xpad-dbg-out: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->odata, XPAD_PKT_LEN, 0);
+        // From: https://github.com/paroj/xpad/blob/master/xpad.c
+        print_hex_dump(KERN_DEBUG, "xpad-dbg-out: ", DUMP_PREFIX_OFFSET, 32, 1, xpad->odata, XPAD_PKT_LEN, 0);
 #endif
-
 		return true;
 	}
 
